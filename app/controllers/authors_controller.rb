@@ -33,9 +33,51 @@ class AuthorsController < ApplicationController
     end
   end
 
+  # POST /authors/github_webhook
+  def github_webhook
+    issue_event = JSON.parse(request.body.read)
+    handler_method = "handle_github_issue_#{issue_event["action"]}"
+    self.send handler_method, issue_event
+
+    rescue JSON::ParserError => e
+      render json: {:status => 400, :error => "Invalid Github Event Payload"} and return
+    
+    rescue NoMethodError => e
+      render json: {:status => 500, :error => "Handler Method Not Implemented"} and return
+  end
+
   # DELETE /authors/1
   def destroy
     @author.destroy
+  end
+
+  def handle_github_issue_opened(event)
+    author_payload = {
+      :author => {
+        :name => event["issue"]["title"],
+        :biography => event["issue"]["body"],
+        :github_issue_id => event["issue"]["id"]
+      }
+    }
+    params.merge!(author_payload)
+    self.create
+  end
+
+  def handle_github_issue_edited(event)
+    @author = Author.find_by(:github_issue_id => event["issue"]["id"])
+    author_payload = {
+      :author => {
+        :name => event["issue"]["title"],
+        :biography => event["issue"]["body"]
+      }
+    }
+    params.merge!(author_payload)
+    self.update
+  end
+
+  def handle_github_issue_closed(event)
+    @author = Author.find_by(:github_issue_id => event["issue"]["id"])
+    self.destroy
   end
 
   private
@@ -46,6 +88,6 @@ class AuthorsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def author_params
-      params.require(:author).permit(:name, :biography)
+      params.require(:author).permit(:name, :biography, :github_issue_id)
     end
 end
