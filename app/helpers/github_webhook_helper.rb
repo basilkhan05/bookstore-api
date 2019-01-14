@@ -26,6 +26,8 @@ module GithubWebhookHelper
     
     params.merge!(author_payload)
     self.update
+    bio_book = @author.books.find_by(:price => 0)
+    bio_book.update(:title => "Biography of #{event["issue"]["title"]}")
   end
 
   def handle_github_issue_closed(event)
