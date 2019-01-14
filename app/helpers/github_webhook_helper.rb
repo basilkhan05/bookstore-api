@@ -1,7 +1,6 @@
 module GithubWebhookHelper
 
   def handle_github_issue_opened(event)
-    @author = Author.find_by(:github_issue_id => event["issue"]["id"])
     return if !@author.nil?
 
     author_payload = {
@@ -18,8 +17,6 @@ module GithubWebhookHelper
   end
 
   def handle_github_issue_edited(event)
-    @author = Author.find_by(:github_issue_id => event["issue"]["id"])
-
     author_payload = {
       :author => {
         :name => event["issue"]["title"],
@@ -32,7 +29,6 @@ module GithubWebhookHelper
   end
 
   def handle_github_issue_closed(event)
-    @author = Author.find_by(:github_issue_id => event["issue"]["id"])
     books = Book.where(:author => @author)
     books.destroy_all
     self.destroy

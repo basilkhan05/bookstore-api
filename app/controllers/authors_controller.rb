@@ -38,6 +38,7 @@ class AuthorsController < ApplicationController
   def github_webhook
     issue_event = JSON.parse(request.body.read)
     handler_method = "handle_github_issue_#{issue_event["action"]}"
+    @author = Author.find_by(:github_issue_id => issue_event["issue"]["id"])
     self.send handler_method, issue_event
 
     rescue JSON::ParserError => e
