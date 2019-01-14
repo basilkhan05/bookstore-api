@@ -1,3 +1,4 @@
+require 'ngrok/tunnel'
 # Puma can serve each request in a thread from an internal thread pool.
 # The `threads` method setting takes two numbers: a minimum and maximum.
 # Any libraries that use thread pools should be configured to match
@@ -14,6 +15,14 @@ port        ENV.fetch("PORT") { 3000 }
 # Specifies the `environment` that Puma will run in.
 #
 environment ENV.fetch("RAILS_ENV") { "development" }
+
+if ENV['RAILS_ENV'] == 'development'
+  options = {
+    :port => 3000
+  }
+  ngrok_url = Ngrok::Tunnel.start(options)
+  puts "=> Your Ngrok URL --> #{ngrok_url}"
+end
 
 # Specifies the number of `workers` to boot in clustered mode.
 # Workers are forked webserver processes. If using threads and workers together
