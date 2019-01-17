@@ -18,7 +18,7 @@ environment ENV.fetch("RAILS_ENV") { "development" }
 
 if ENV['RAILS_ENV'] == 'development'
   options = {
-    :port => 3000
+    :port => ENV.fetch("PORT") { 3000 }
   }
   ngrok_url = Ngrok::Tunnel.start(options)
   puts "=> Your Ngrok URL --> #{ngrok_url}"
