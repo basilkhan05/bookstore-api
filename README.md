@@ -45,6 +45,18 @@ Go to [ngrok - download](https://ngrok.com/download), to download the ngrok exec
 
 Copy/move the file over to the `/usr/local/bin/` directory.
 
+## Setup environment variables
+
+- Create a `.env` file in the root of your application
+- Run the following to generate a `<<secret_token>>`
+
+`ruby -rsecurerandom -e 'puts SecureRandom.hex(20)'`
+
+Copy and store the token in the .env file as
+
+`GITHUB_WEBHOOK_SECRET_TOKEN=<<secret_token>>`
+
+
 ## Start your local server
 
 Run the rails server to see your application live.
@@ -75,6 +87,7 @@ In Github, go to your `bookstore-api` repo Settings page. Click on Webhooks and 
 
 - Payload URL to `{{BASE_URL}}/authors/github_webhook` and 
 - Content Type to `application/json`
+- Add the same `<<secret_token>>` from the `Setup environment variables` section above
 - Select `Let me select individual events` and click on `Issues` only.
 - Set to `Active`
 - Enable the Webhook
