@@ -37,9 +37,12 @@ class AuthorsController < ApplicationController
   # POST /authors/github_webhook
   def github_webhook
     issue_event = JSON.parse(request.body.read)
-    handler_method = "handle_github_issue_#{issue_event["action"]}"
-    @author = Author.find_by(:github_issue_id => issue_event["issue"]["id"])
-    self.send handler_method, issue_event
+
+    github_service = GithubService.new(issue_event)
+    handler_method = "handle_webhook_issue_#{issue_event["action"]}"
+    
+    @author = github_service.send handler_method
+    render json: @author
 
     rescue JSON::ParserError => e
       render json: {:status => 400, :error => "Invalid Github Event Payload"} and return
