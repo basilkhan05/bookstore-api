@@ -1,5 +1,4 @@
 class AuthorsController < ApplicationController
-  include GithubWebhookHelper
   before_action :set_author, only: [:show, :update, :destroy]
 
   # GET /authors
@@ -38,12 +37,10 @@ class AuthorsController < ApplicationController
   def github_webhook
     webhook_body = request.body.read
     verify_signature(webhook_body, request.env['HTTP_X_HUB_SIGNATURE'])
-    issue_event = JSON.parse(webhook_body)
+    event = JSON.parse(webhook_body)
+    event_type = request.env['HTTP_X_GITHUB_EVENT']
 
-    github_service = GithubService.new(issue_event)
-    handler_method = "handle_webhook_issue_#{issue_event["action"]}"
-    
-    @author = github_service.send handler_method
+    @author = GithubEventProcessor.new(event, event_type).process
     render json: @author
 
     rescue JSON::ParserError => e
